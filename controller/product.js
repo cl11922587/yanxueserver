@@ -1,9 +1,9 @@
 //引入db配置
 const db = require('../config/db');
-
+const SequelizeOp = require('sequelize');
+const Op = SequelizeOp.Op;
 //引入sequelize对象
 const Sequelize = db.sequelize;
-
 //引入数据表模型
 const product = Sequelize.import('../module/product')
 
@@ -27,6 +27,17 @@ class productModule {
       limit: [page*limit-limit,parseInt(limit)]
 
     })
+  }
+
+  static  async getproductdataSearch(keyword){
+      return await product.findAndCountAll({
+          where:{
+              name:{
+                  [Op.like]:'%'+keyword+'%',
+              }
+          },
+          limit:6,
+      })
   }
 }
 class productController {
@@ -56,12 +67,24 @@ class productController {
     const req = ctx.request.query;
       const  query = await productModule.getproductdatalist(req.limit,req.page,req.type);
       if(query){
-        ctx.response.status = 200;
-        ctx.body = {
-          code: 1,
-          data: query
-        }
+          ctx.response.status = 200;
+          ctx.body = {
+              code: 1,
+              data: query
+          }
     }
+  }
+  static async getSearch(ctx,next){
+    const req = ctx.request.query;
+      const query = await productModule.getproductdataSearch(req.keyWord);
+      if(query){
+          ctx.response.status = 200;
+          ctx.body = {
+              code: 1,
+              data: query
+          }
+      }
+
   }
 }
 module.exports = productController;

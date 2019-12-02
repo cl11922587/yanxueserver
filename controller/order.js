@@ -82,15 +82,17 @@ class orderController {
         if (token) {
             try {
                 const userinfo = await tools.verToken(token);
+
                 //生成订单
                 const query = await orderModule.creatOrder(req.orderInfo, req.productInfo, userinfo.userid);
+
                 //生成出行表
                 if (query.id) {
                     for (var item of req.orderInfo.student) {
-                        var queryTravel = await
-                        orderModule.creatTravel(item, query.id);
+                        var queryTravel = await orderModule.creatTravel(item, query.id);
                     }
                 }
+
                 if (query.id && queryTravel.id) {
                     ctx.response.status = 200;
                     ctx.body = {
